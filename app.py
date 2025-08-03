@@ -35,7 +35,7 @@ with st.sidebar:
         "Google Gemini API Key:",
         value="",
         type="password",
-        help="Required for Gemini model. Not saved for security after web-app tab close.",
+        help="Required for Gemini model. Not saved and use for security after web-app tab close.",
     )
 
     # Model configuration
