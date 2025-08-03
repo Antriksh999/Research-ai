@@ -35,23 +35,8 @@ with st.sidebar:
         "Google Gemini API Key:",
         value="",
         type="password",
-        help="Required for Gemini model. Stored only in current session - automatically cleared when tab closes.",
-        placeholder="Enter your API key here...",
-        key="api_key_input"
+        help="Required for Gemini model. Not saved and use for security after web-app tab close.",
     )
-    
-    # Clear API key button right after input
-    if st.session_state.get('temp_api_key'):
-        col1, col2 = st.columns([3, 1])
-        with col2:
-            if st.button("🗑️ Clear", help="Remove API key from current session", key="clear_api"):
-                # Clear from session state
-                if 'temp_api_key' in st.session_state:
-                    del st.session_state['temp_api_key']
-                # Clear from input field by clearing its key
-                if 'api_key_input' in st.session_state:
-                    del st.session_state['api_key_input']
-                st.rerun()
 
     # Model configuration
     st.subheader("Model Selection")
@@ -76,18 +61,9 @@ with st.sidebar:
     )
     
     if api_key_input:
-        # Store API key only in session state, not environment
-        st.session_state['temp_api_key'] = api_key_input
-        st.success("✅ Gemini API Key configured (current session only)")
+        st.success("✅ Gemini API Key configured (session only)")
     else:
-        # Clear temp key if input is empty
-        if 'temp_api_key' in st.session_state and not api_key_input:
-            del st.session_state['temp_api_key']
-        
-        # Check if API key exists in environment (from Streamlit secrets only)
-        if os.getenv("GOOGLE_API_KEY") and not st.session_state.get('temp_api_key'):
-            st.success("✅ Gemini API Key loaded from environment secrets")
-        elif model_preference in ["Auto (Gemini first, fallback to Ollama)", "Gemini Only"]:
+        if model_preference in ["Auto (Gemini first, fallback to Ollama)", "Gemini Only"]:
             st.warning("⚠️ Gemini requires API key")
         else:
             st.info("💡 Using Ollama (local model)")
@@ -138,15 +114,12 @@ with st.sidebar:
     # Instructions
     with st.expander("💡 How to use"):
         st.write("""
-        1. Enter your Google Gemini API key in the field above (session only - not saved permanently).
-        2. Select your preferred search tools and model preference.
+        1. Enter your API key above and add your key from google or use ollama for local llm.
+        2. Select your preferred search tools.
         3. Enter your research topic in the main area.
-        4. The AI will generate a comprehensive academic report.
-        5. Download your report using the download button.
-        
-        🔒 **Security Note**: Your API key is only stored for the current session and is automatically cleared when you close the tab.
+        4. The report will be generated and saved automatically.
+        5. Use the download button to get your report.
         """)
-        
 
 today = datetime.now().strftime("%Y-%m-%d")
 
@@ -210,9 +183,6 @@ if not tools:
 def get_selected_model():
     """Select model based on user preference and availability"""
     
-    # Get the active API key from session or environment
-    active_api_key = st.session_state.get('temp_api_key') or os.getenv("GOOGLE_API_KEY", "")
-    
     if model_preference == "Ollama Only":
         if not model_input1:
             st.error("❌ Please specify Ollama model ID")
@@ -225,26 +195,22 @@ def get_selected_model():
             return None
     
     elif model_preference == "Gemini Only":
-        if not active_api_key:
+        if not api_key_input:
             st.error("❌ Gemini requires API key")
             return None
         if not model_input2:
             st.error("❌ Please specify Gemini model ID")
             return None
         try:
-            # Set API key temporarily for Google AI Studio (not Vertex AI)
-            os.environ["GOOGLE_API_KEY"] = active_api_key
-            return Gemini(id=model_input2)
+            return Gemini(id=model_input2, api_key=api_key_input)
         except Exception as e:
             st.error(f"❌ Gemini connection failed: {str(e)}")
             return None
     
     else:  # Auto mode - try Gemini first, fallback to Ollama
-        if active_api_key and model_input2:
+        if api_key_input and model_input2:
             try:
-                # Set API key temporarily for Google AI Studio (not Vertex AI)
-                os.environ["GOOGLE_API_KEY"] = active_api_key
-                return Gemini(id=model_input2)
+                return Gemini(id=model_input2, api_key=api_key_input)
             except Exception as e:
                 st.warning(f"⚠️ Gemini failed: {str(e)}. Trying Ollama...")
                 if model_input1:
