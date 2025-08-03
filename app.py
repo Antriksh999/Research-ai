@@ -55,8 +55,9 @@ with st.sidebar:
     # Model preference
     model_preference = st.radio(
         "Model Preference:",
-        ["Auto (Gemini first, fallback to Ollama)", "Gemini Only", "Ollama Only"],
-        index=0
+        ["Gemini Only", "Auto (Gemini first, fallback to Ollama)", "Ollama Only"],
+        index=0,
+        help="Note: Ollama requires local installation and won't work on Streamlit Cloud"
     )
     
     if api_key_input:
@@ -67,6 +68,10 @@ with st.sidebar:
             st.warning("⚠️ Gemini requires API key")
         else:
             st.info("💡 Using Ollama (local model)")
+        
+    # Cloud deployment warning
+    if model_preference == "Ollama Only":
+        st.warning("⚠️ Note: Ollama won't work on Streamlit Cloud. Please use Gemini or Auto mode.")
         
     
     # Web search tools selection
@@ -183,7 +188,12 @@ def get_selected_model():
         if not model_input1:
             st.error("❌ Please specify Ollama model ID")
             return None
-        return Ollama(id=model_input1)
+        try:
+            return Ollama(id=model_input1)
+        except Exception as e:
+            st.error(f"❌ Ollama connection failed: {str(e)}")
+            st.info("💡 Ollama requires local installation. Try using Gemini instead.")
+            return None
     
     elif model_preference == "Gemini Only":
         if not api_key_input:
@@ -192,21 +202,35 @@ def get_selected_model():
         if not model_input2:
             st.error("❌ Please specify Gemini model ID")
             return None
-        return Gemini(id=model_input2)
+        try:
+            return Gemini(id=model_input2)
+        except Exception as e:
+            st.error(f"❌ Gemini connection failed: {str(e)}")
+            return None
     
     else:  # Auto mode - try Gemini first, fallback to Ollama
         if api_key_input and model_input2:
             try:
                 return Gemini(id=model_input2)
             except Exception as e:
-                st.warning(f"⚠️ Gemini failed: {str(e)}. Falling back to Ollama...")
+                st.warning(f"⚠️ Gemini failed: {str(e)}. Trying Ollama...")
                 if model_input1:
-                    return Ollama(id=model_input1)
+                    try:
+                        return Ollama(id=model_input1)
+                    except Exception as e2:
+                        st.error(f"❌ Both models failed. Gemini: {str(e)}, Ollama: {str(e2)}")
+                        st.info("💡 Please check your API key or use Gemini Only mode")
+                        return None
                 else:
                     st.error("❌ No fallback model available")
                     return None
         elif model_input1:
-            return Ollama(id=model_input1)
+            try:
+                return Ollama(id=model_input1)
+            except Exception as e:
+                st.error(f"❌ Ollama failed: {str(e)}")
+                st.info("💡 Ollama requires local installation. Please add Gemini API key or use Gemini Only mode")
+                return None
         else:
             st.error("❌ No model configured")
             return None
