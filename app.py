@@ -349,15 +349,15 @@ if input_prompt:
     
     st.write("## 📊 Research Report")
     
-    with st.spinner("🔍 Generating research report..."):
+    with st.spinner("Generating research report..."):
         try:
             # Generate the report
             with st.empty():
-                st.info("🔄 Agent is researching your topic...")
+                st.info("Agent is researching your topic...")
                 response = agent.run(input_prompt, stream=False)
             
             # Clear any intermediate outputs and display only the final result
-            st.markdown("### 📄 Generated Research Report")
+            st.markdown("### Generated Research Report")
             st.markdown("---")
             
             # Display the response content
