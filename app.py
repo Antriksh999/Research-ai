@@ -27,7 +27,7 @@ load_dotenv()
 
 # Sidebar configuration
 with st.sidebar:
-    st.header("⚙️ Configuration")
+    st.header("Configuration")
     
     # API Key input
     st.subheader("🔑 API Key")
@@ -39,7 +39,7 @@ with st.sidebar:
     )
 
     # Model configuration
-    st.subheader("🤖 Model Selection")
+    st.subheader("Model Selection")
     model_input1 = st.text_input(
         "Ollama Model ID:",
         value="llama3.1",
@@ -70,7 +70,7 @@ with st.sidebar:
         
     
     # Web search tools selection
-    st.subheader("� Search Tools")
+    st.subheader("Search Tools")
     use_wikipedia = st.checkbox(
         "📚 Wikipedia Search", 
         value=True,
@@ -91,7 +91,7 @@ with st.sidebar:
         st.error("❌ Please select at least one search tool")
     
     # Report settings
-    st.subheader("📄 Report Settings")
+    st.subheader("Report Settings")
     report_length = st.selectbox(
         "Report Length:",
         ["Standard (5+ pages)", "Extended (8+ pages)", "Comprehensive (10+ pages)"],
@@ -99,12 +99,12 @@ with st.sidebar:
     )
     
     include_citations = st.checkbox(
-        "📎 Include detailed citations", 
+        "Include detailed citations", 
         value=True
     )
     
     # About section
-    st.subheader("ℹ️ About")
+    st.subheader("About")
     st.info("This AI-powered research assistant generates comprehensive academic reports using multiple search tools and Google Gemini AI.")
     
     # Instructions
@@ -119,7 +119,7 @@ with st.sidebar:
 
 today = datetime.now().strftime("%Y-%m-%d")
 
-st.title("🔬 Research Content Extractor Agent")
+st.title("Research Content Extractor Agent")
 st.markdown("*AI-Powered Academic Research Report Generator*")
 
 # Check if we need to clear the input after successful generation
@@ -136,7 +136,7 @@ input_prompt = st.text_area(
 
 # Example topics
 if not input_prompt:
-    with st.expander("💡 Example Research Topics", expanded=True):
+    with st.expander("Example Research Topics", expanded=True):
         example_topics = [
             "The impact of artificial intelligence on healthcare delivery",
             "Sustainable energy solutions for urban environments", 
@@ -149,7 +149,7 @@ if not input_prompt:
         cols = st.columns(2)
         for i, topic in enumerate(example_topics):
             with cols[i % 2]:
-                if st.button(f"📖 {topic}", key=f"topic_{i}"):
+                if st.button(f"{topic}", key=f"topic_{i}"):
                     st.session_state.selected_topic = topic
                     st.rerun()
 
@@ -316,7 +316,7 @@ if input_prompt:
             if use_googlesearch:
                 st.write("✅ Google Search")
         with col2:
-            st.write("**🤖 Model Configuration:**")
+            st.write("**Model Configuration:**")
             model_type = type(selected_model).__name__
             model_id = selected_model.id if hasattr(selected_model, 'id') else "Unknown"
             st.write(f"🧠 Model: {model_type} ({model_id})")
@@ -362,8 +362,8 @@ if input_prompt:
             
         except Exception as e:
             st.error(f"❌ Error generating report: {str(e)}")
-            st.info("💡 Try refreshing the page or checking your API key configuration")
+            st.info("Try refreshing the page or checking your API key configuration")
 
 else:
     # Welcome message when no input
-    st.info("💡 **Get started:** Enter a research topic above or select from example topics to generate a comprehensive academic report.")
+    st.info("**Get started:** Enter a research topic above or select from example topics to generate a comprehensive academic report.")
