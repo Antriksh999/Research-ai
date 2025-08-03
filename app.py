@@ -33,9 +33,9 @@ with st.sidebar:
     st.subheader("🔑 API Key")
     api_key_input = st.text_input(
         "Google Gemini API Key:",
-        value=os.getenv("GOOGLE_API_KEY", ""),
+        value="",
         type="password",
-        help="Required for Gemini model"
+        help="Required for Gemini model. Not saved for security after web-app tab close.",
     )
 
     # Model configuration
@@ -61,10 +61,15 @@ with st.sidebar:
     )
     
     if api_key_input:
+        # Only set for current session, don't persist
         os.environ["GOOGLE_API_KEY"] = api_key_input
-        st.success("✅ Gemini API Key configured")
+        st.success("✅ Gemini API Key configured (session only)")
     else:
-        if model_preference in ["Auto (Gemini first, fallback to Ollama)", "Gemini Only"]:
+        # Check if API key exists in environment (from Streamlit secrets)
+        if os.getenv("GOOGLE_API_KEY"):
+            api_key_input = os.getenv("GOOGLE_API_KEY")
+            st.success("✅ Gemini API Key loaded from environment")
+        elif model_preference in ["Auto (Gemini first, fallback to Ollama)", "Gemini Only"]:
             st.warning("⚠️ Gemini requires API key")
         else:
             st.info("💡 Using Ollama (local model)")
@@ -385,7 +390,7 @@ if input_prompt:
             st.session_state['clear_input'] = True
             
         except Exception as e:
-            st.error(f"❌ Error generating report: {str(e)}")
+            st.error(f"Error generating report: {str(e)}")
             st.info("Try refreshing the page or checking your API key configuration")
 
 else:
