@@ -1,0 +1,11 @@
+agno
+google-genai
+exa-py
+python-dotenv
+streamlit
+wikipedia
+pycountry
+ollama
+duckduckgo-search
+requests
+markdown
